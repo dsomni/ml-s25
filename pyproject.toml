@@ -5,16 +5,21 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "accelerate>=1.6.0",
     "aiolimiter>=1.2.1",
     "asyncio>=3.4.3",
+    "bitsandbytes>=0.45.4",
+    "datasets>=3.5.0",
     "g4f[all]>=0.5.0.1",
     "gensim>=4.3.3",
     "googletrans>=4.0.2",
     "ipykernel>=6.29.5",
     "nltk>=3.9.1",
     "pandas>=2.2.3",
+    "peft>=0.15.1",
     "ruff>=0.11.2",
     "scikit-learn>=1.6.1",
+    "sentencepiece>=0.2.0",
     "torch>=2.6.0",
     "tqdm>=4.67.1",
 ]
