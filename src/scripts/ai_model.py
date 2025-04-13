@@ -7,6 +7,8 @@ from transformers import (
 )
 
 
+# Similar to PyTorch's native torch.nn.MarginRankingLoss but with the sigmoid operation on arguments
+# Check https://pytorch.org/docs/stable/generated/torch.nn.MarginRankingLoss.html
 def get_ranking_loss(logits, labels, margin=0.7):
     logits = torch.sigmoid(logits)
     labels1 = labels.unsqueeze(1)
