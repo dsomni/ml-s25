@@ -8,7 +8,7 @@ from transformers import (
 
 class AiDataset:
     def __init__(self):
-        self.tokenizer = DebertaV2Tokenizer.from_pretrained("microsoft/deberta-v3-large")
+        self.tokenizer = DebertaV2Tokenizer.from_pretrained("microsoft/deberta-v3-xsmall")
 
     def tokenize_function(self, examples):
         tz = self.tokenizer(

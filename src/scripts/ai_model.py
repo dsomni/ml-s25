@@ -54,7 +54,7 @@ class AiModel(nn.Module):
 
         super(AiModel, self).__init__()
         # ----------------------------- Backbone -----------------------------------------#
-        backbone_config = DebertaV2Config.from_pretrained("microsoft/deberta-v3-large")
+        backbone_config = DebertaV2Config.from_pretrained("microsoft/deberta-v3-xsmall")
         backbone_config.update(
             {
                 "use_cache": False,
@@ -62,7 +62,7 @@ class AiModel(nn.Module):
         )
 
         self.backbone = DebertaV2Model.from_pretrained(
-            "microsoft/deberta-v3-large", config=backbone_config
+            "microsoft/deberta-v3-xsmall", config=backbone_config
         )
 
         self.backbone.gradient_checkpointing_enable()
