@@ -2,13 +2,23 @@ from copy import deepcopy
 
 from datasets import Dataset
 from transformers import (
-    DebertaV2Tokenizer,
+    RobertaTokenizer, DebertaV2Tokenizer
 )
 
+class DatasetType:
+    ROBERTA = 1,
+    DEBERTA = 2,
 
 class AiDataset:
-    def __init__(self):
-        self.tokenizer = DebertaV2Tokenizer.from_pretrained("microsoft/deberta-v3-xsmall")
+    def __init__(self, model_name, model_type):
+        self.tokenizer = None
+        if model_type == DatasetType.ROBERTA:
+            self.tokenizer = RobertaTokenizer.from_pretrained(model_name)
+        elif model_type == DatasetType.DEBERTA:
+            self.tokenizer = DebertaV2Tokenizer.from_pretrained(model_name)
+        else:
+            raise NotImplementedError
+
 
     def tokenize_function(self, examples):
         tz = self.tokenizer(

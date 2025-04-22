@@ -2,8 +2,7 @@ import torch
 import torch.nn as nn
 import torch.utils.checkpoint
 from transformers import (
-    DebertaV2Config,
-    DebertaV2Model,
+    RobertaConfig, RobertaModel, DebertaV2Config, DebertaV2Model
 )
 
 
@@ -43,27 +42,45 @@ class MeanPooling(nn.Module):
 # Rank Model
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+class ModelType:
+    ROBERTA = 1,
+    DEBERTA = 2,
 
 class AiModel(nn.Module):
     """
     The LLM Detect AI Generated Text Model
     """
 
-    def __init__(self, device):
+    def __init__(self, device, model_name, model_type):
         print("initializing the Rank Model...")
 
         super(AiModel, self).__init__()
         # ----------------------------- Backbone -----------------------------------------#
-        backbone_config = DebertaV2Config.from_pretrained("microsoft/deberta-v3-xsmall")
+        if model_type == ModelType.ROBERTA:
+            backbone_config = RobertaConfig.from_pretrained(model_name)
+        elif model_type == ModelType.DEBERTA:
+            backbone_config = DebertaV2Config.from_pretrained(model_name)
+        else:
+            raise NotImplementedError
+
         backbone_config.update(
             {
                 "use_cache": False,
             }
         )
 
-        self.backbone = DebertaV2Model.from_pretrained(
-            "microsoft/deberta-v3-xsmall", config=backbone_config
-        )
+        self.backbone = None
+
+        if model_type == ModelType.ROBERTA:
+            self.backbone = RobertaModel.from_pretrained(
+                model_name, config=backbone_config
+            )
+        elif model_type == ModelType.DEBERTA:
+            self.backbone = DebertaV2Model.from_pretrained(
+                model_name, config=backbone_config
+            )
+        else:
+            raise NotImplementedError
 
         self.backbone.gradient_checkpointing_enable()
 
