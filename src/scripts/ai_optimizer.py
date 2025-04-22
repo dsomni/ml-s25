@@ -10,7 +10,7 @@ def get_optimizer_grouped_parameters_with_llrd(model):
         {
             "params": [p for n, p in model.named_parameters() if "backbone" not in n],
             "lr": 2e-5,
-            "weight_decay": 0,  # 1e-3,
+            "weight_decay": 1e-3,
         },
     ]
 
@@ -29,7 +29,7 @@ def get_optimizer_grouped_parameters_with_llrd(model):
                     for n, p in layer.named_parameters()
                     if not any(nd in n for nd in no_decay)
                 ],
-                "weight_decay": 0,  # 1e-3,
+                "weight_decay": 1e-3,
                 "lr": lr,
             },
             {

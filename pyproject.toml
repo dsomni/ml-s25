@@ -27,6 +27,7 @@ dependencies = [
     "tree-sitter>=0.24.0",
     "tree-sitter-python>=0.23.6",
     "matplotlib>=3.10.1",
+    "protobuf>=6.30.2",
 ]
 
 [tool.uv.sources]
