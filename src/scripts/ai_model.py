@@ -119,8 +119,9 @@ class AiModel(nn.Module):
 
         # loss
         loss = None
-        labels = labels.reshape(-1)
+        
         if labels is not None:
+            labels = labels.reshape(-1)
             loss = get_ranking_loss(logits, labels)
 
         return logits, loss
