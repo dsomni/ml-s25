@@ -29,13 +29,13 @@
 >
 >=
 >>
+>>=
 @
 ERROR
 [
 \
 ]
 ^
-^=
 _
 aliased_import
 and
@@ -54,6 +54,11 @@ boolean_operator
 break
 break_statement
 call
+case
+case_clause
+case_pattern
+class
+class_definition
 comment
 comparison_operator
 concatenated_string
@@ -84,6 +89,7 @@ float
 for
 for_in_clause
 for_statement
+format_expression
 format_specifier
 from
 function_definition
@@ -106,14 +112,19 @@ is not
 keyword_argument
 lambda
 lambda_parameters
+line_continuation
 list
 list_comprehension
 list_pattern
 list_splat
 list_splat_pattern
+match
+match_statement
 module
 named_expression
 none
+nonlocal
+nonlocal_statement
 not
 not in
 not_operator

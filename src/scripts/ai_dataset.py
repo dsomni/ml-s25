@@ -20,10 +20,10 @@ class AiDataset:
             raise NotImplementedError
 
 
-    def tokenize_function(self, examples):
+    def tokenize_function(self, examples, padding=False):
         tz = self.tokenizer(
             examples["text"],
-            padding=False,
+            padding=padding,
             truncation=True,
             max_length=128,  # 1024,
             add_special_tokens=True,
