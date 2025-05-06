@@ -170,6 +170,8 @@ cython_debug/
 # Ruff stuff:
 .ruff_cache/
 
+/src/notebooks/checkpoints_path
+
 # PyPI configuration file
 .pypirc
 

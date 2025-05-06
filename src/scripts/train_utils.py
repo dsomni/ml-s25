@@ -36,9 +36,10 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def save_checkpoint(state, is_best):
+def save_checkpoint(state, is_best, name=None):
     os.makedirs("./checkpoints_path", exist_ok=True)
-    name = "detect_ai_model"
+    if name is None:
+        name = "detect_ai_model"
 
     filename = f"./checkpoints_path/{name}_last.pth.tar"
     torch.save(state, filename, _use_new_zipfile_serialization=False)

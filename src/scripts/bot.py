@@ -22,14 +22,26 @@ from aiogram.types import BufferedInputFile
 from tree_sitter import Language, Parser
 import pickle
 import tree_sitter_python as tspython
+from time import time
 
 load_dotenv() 
 
 TOKEN = getenv("BOT_TOKEN")
 
+NAME = "codebert"
 MODEL_NAME = "microsoft/codebert-base"
 MODEL_TYPE = ModelType.ROBERTA
 DATASET_TYPE = DatasetType.ROBERTA
+
+# NAME = "deberta_base"
+# MODEL_NAME = "microsoft/deberta-v3-base"
+# MODEL_TYPE = ModelType.DEBERTA
+# DATASET_TYPE = DatasetType.DEBERTA
+
+# NAME = "deberta_small"
+# MODEL_NAME = "microsoft/deberta-v3-xsmall"
+# MODEL_TYPE = ModelType.DEBERTA
+# DATASET_TYPE = DatasetType.DEBERTA
 
 import pickle
 
@@ -39,7 +51,7 @@ with open('./src/notebooks/trees_path/random_forest_classifier_model.pkl', 'rb')
 
 AI_MODEL = None
 AI_DATASET = None
-checkpoint_path = "./src/notebooks/checkpoints_path/detect_ai_model_best.pth.tar"
+checkpoint_path = f"./src/notebooks/checkpoints_path/{NAME}_best.pth.tar"
 
 dp = Dispatcher()
 
@@ -134,7 +146,9 @@ async def detector_handler(message: Message) -> None:
         data[key] = torch.tensor([data[key]], dtype=torch.int64)
 
     with torch.no_grad():
+        start = time()
         resp = torch.sigmoid(AI_MODEL(**data)[0])
+        duration_llm = time() - start
         prob = resp.item()
 
     explainer = LimeTextExplainer(
@@ -170,19 +184,21 @@ async def detector_handler(message: Message) -> None:
         
         await message.reply_photo(
             photo,
-            caption=f"LLM AI-generated probability: {prob:.4f}\n\n{explanation_text}",
+            caption=f"LLM AI-generated probability ({MODEL_NAME}): {prob:.4f}\n\nElapsed time: {duration_llm:.4f}s\n\n{explanation_text}",
             parse_mode="Markdown"
         )
         
     except Exception as e:
         logging.error(f"Explanation failed: {str(e)}")
         await message.answer(
-            f"LLM AI-generated probability: {prob:.4f}\n\nCould not generate detailed explanation."
+            f"LLM AI-generated probability ({MODEL_NAME}): {prob:.4f}\n\nElapsed time: {duration_llm:.4f}s\n\nCould not generate detailed explanation."
         )
 
 
     try:
+        start = time()
         dt_pred = TREE_MODEL.predict_proba([code_to_feature_vector(code)])[0][1]
+        duration_ast = time() - start
 
         explainerDT = LimeTextExplainer(
             class_names=["human", "AI"],
@@ -213,14 +229,14 @@ async def detector_handler(message: Message) -> None:
         
         await message.reply_photo(
             photo,
-            caption=f"DT AI-generated probability: {dt_pred:.4f}\n\n{explanation_text}",
+            caption=f"DT AI-generated probability: {dt_pred:.4f}\n\nElapsed time: {duration_ast:.4f}s\n\n{explanation_text}",
             parse_mode="Markdown"
         )
         
     except Exception as e:
         logging.error(f"Explanation failed: {str(e)}")
         await message.answer(
-            f"DT AI-generated probability: {dt_pred:.4f}\n\nCould not generate detailed explanation."
+            f"DT AI-generated probability: {dt_pred:.4f}\n\nElapsed time: {duration_ast:.4f}s\n\nCould not generate detailed explanation."
         )
 
 
