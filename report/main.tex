@@ -189,7 +189,7 @@ An Abstract Syntax Tree (AST) is a finite labeled oriented tree in which the inn
 
 To distinguish between human-written and AI-generated Python code, we employ an abstract syntax tree (AST)-based representation that captures the structural and syntactic patterns of the code. Unlike raw text-based or token-based methods, ASTs provide a more robust and hierarchical representation of code, making them suitable for detecting subtle differences in coding styles between humans and AI models.
 
-The first step in our approach is to convert the Python source code into its AST representation. This is done using \href{https://tree-sitter.github.io/tree-sitter/}{Tree-setter} library, which parses the code into a tree structure where:
+The first step in our approach is to convert the Python source code into its AST representation. This is done using \href{https://tree-sitter.github.io/tree-sitter/}{Tree-sitter} library, which parses the code into a tree structure where:
 
 \begin{itemize}
   \item Nodes represent syntactic elements: functions, loops, conditionals, etc.
