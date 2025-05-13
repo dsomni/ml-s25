@@ -1,13 +1,13 @@
 from copy import deepcopy
 
 from datasets import Dataset
-from transformers import (
-    RobertaTokenizer, DebertaV2Tokenizer
-)
+from transformers import DebertaV2Tokenizer, RobertaTokenizer
+
 
 class DatasetType:
-    ROBERTA = 1,
-    DEBERTA = 2,
+    ROBERTA = (1,)
+    DEBERTA = (2,)
+
 
 class AiDataset:
     def __init__(self, model_name, model_type):
@@ -18,7 +18,6 @@ class AiDataset:
             self.tokenizer = DebertaV2Tokenizer.from_pretrained(model_name)
         else:
             raise NotImplementedError
-
 
     def tokenize_function(self, examples, padding=False):
         tz = self.tokenizer(

@@ -1,4 +1,11 @@
-from sklearn.metrics import f1_score, r2_score, recall_score, roc_auc_score, accuracy_score, precision_score
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    r2_score,
+    recall_score,
+    roc_auc_score,
+)
 
 
 def compute_metrics(predictions, truths):

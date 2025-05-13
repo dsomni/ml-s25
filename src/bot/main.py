@@ -1,30 +1,34 @@
 import asyncio
+import io
 import logging
+import os
+import pickle
 import re
 import sys
 from os import getenv
+from time import time
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
+import tree_sitter_python as tspython
 from accelerate import Accelerator
-from ai_dataset import AiDataset, DatasetType
-from ai_model import AiModel, ModelType
 from aiogram import Bot, Dispatcher, html
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
-from aiogram.types import Message
-from lime.lime_text import LimeTextExplainer
-import numpy as np
+from aiogram.types import BufferedInputFile, Message
 from dotenv import load_dotenv
-import matplotlib.pyplot as plt
-import io
-from aiogram.types import BufferedInputFile
+from lime.lime_text import LimeTextExplainer
 from tree_sitter import Language, Parser
-import pickle
-import tree_sitter_python as tspython
-from time import time
 
-load_dotenv() 
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+
+from scripts.ai_dataset import AiDataset, DatasetType
+from scripts.ai_model import AiModel, ModelType
+
+load_dotenv()
 
 TOKEN = getenv("BOT_TOKEN")
 
@@ -43,10 +47,9 @@ DATASET_TYPE = DatasetType.ROBERTA
 # MODEL_TYPE = ModelType.DEBERTA
 # DATASET_TYPE = DatasetType.DEBERTA
 
-import pickle
 
 TREE_MODEL = None
-with open('./src/notebooks/trees_path/random_forest_classifier_model.pkl', 'rb') as f:
+with open("./src/notebooks/trees_path/random_forest_classifier_model.pkl", "rb") as f:
     TREE_MODEL = pickle.load(f)
 
 AI_MODEL = None
@@ -67,21 +70,23 @@ node_types = set()
 with open("./data/ast/node_types.txt", "r", encoding="utf-8") as f:
     node_types = [x.strip() for x in f.readlines()]
 
+
 def walk_tree(node, types):
     types.append(node.type)
     for child in node.children:
         walk_tree(child, types)
 
 
-def code_to_feature_vector(code) :
-    code = code.encode('utf-8')
+def code_to_feature_vector(code):
+    code = code.encode("utf-8")
     tree = parser.parse(code)
     types = []
     walk_tree(tree.root_node, types)
     counts = Counter(types)
     feature_vector = [counts.get(typ, 0) for typ in node_types]
-    
+
     return feature_vector
+
 
 def extract_python_code(res: str) -> str:
     try:
@@ -111,36 +116,37 @@ async def command_start_handler(message: Message) -> None:
 
 def predict_proba_lime(text):
     data = AI_DATASET.tokenize_function({"text": text}, padding=True)
-    
+
     tensor_keys = ["input_ids", "attention_mask"]
     for key in tensor_keys:
         data[key] = torch.tensor(data[key], dtype=torch.int64)
-    
+
     with torch.no_grad():
-            logits, _ = AI_MODEL(**data)
-            logits = logits.reshape(-1)
-            predictions = torch.sigmoid(logits)
-            
+        logits, _ = AI_MODEL(**data)
+        logits = logits.reshape(-1)
+        predictions = torch.sigmoid(logits)
+
     predictions_np = predictions.cpu().numpy()
-    return np.array([[1-x, x] for x in predictions_np])
+    return np.array([[1 - x, x] for x in predictions_np])
+
 
 def predict_proba_rfc(batch_texts):
     feature_vectors = []
     for text in batch_texts:
         feature_vector = code_to_feature_vector(text)
         feature_vectors.append(feature_vector)
-    
 
     X_arr = np.array(feature_vectors)
-    
+
     probas = TREE_MODEL.predict_proba(X_arr)
     return probas
+
 
 @dp.message()
 async def detector_handler(message: Message) -> None:
     code = extract_python_code(message.text)
     data = AI_DATASET.tokenize_function({"text": code})
-    
+
     tensor_keys = ["input_ids", "attention_mask"]
     for key in tensor_keys:
         data[key] = torch.tensor([data[key]], dtype=torch.int64)
@@ -155,45 +161,42 @@ async def detector_handler(message: Message) -> None:
         class_names=["human", "AI"],
     )
 
-    
-    
     try:
         exp = explainer.explain_instance(
             code,
             predict_proba_lime,
-            num_features=10, 
+            num_features=10,
             num_samples=50,
         )
-        
+
         significant_features = [(f, w) for f, w in exp.as_list()]
         fig = exp.as_pyplot_figure()
         plt.tight_layout()
-        
+
         buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=300, bbox_inches='tight')
-        plt.close(fig) 
-        buf.seek(0)  
+        fig.savefig(buf, format="png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
+        buf.seek(0)
         if significant_features:
             explanation_text = "Top features affecting the prediction:\n"
             for feature, weight in significant_features[:5]:
                 explanation_text += f"{weight:.2f}: {feature}\n"
         else:
             explanation_text = "The model decision appears evenly distributed across many small features."
-        
+
         photo = BufferedInputFile(buf.getvalue(), filename="lime_explanation.png")
-        
+
         await message.reply_photo(
             photo,
             caption=f"LLM AI-generated probability ({MODEL_NAME}): {prob:.4f}\n\nElapsed time: {duration_llm:.4f}s\n\n{explanation_text}",
-            parse_mode="Markdown"
+            parse_mode="Markdown",
         )
-        
+
     except Exception as e:
         logging.error(f"Explanation failed: {str(e)}")
         await message.answer(
             f"LLM AI-generated probability ({MODEL_NAME}): {prob:.4f}\n\nElapsed time: {duration_llm:.4f}s\n\nCould not generate detailed explanation."
         )
-
 
     try:
         start = time()
@@ -206,33 +209,33 @@ async def detector_handler(message: Message) -> None:
         exp = explainerDT.explain_instance(
             code,
             predict_proba_rfc,
-            num_features=10, 
+            num_features=10,
             num_samples=100,
         )
-        
+
         significant_features = [(f, w) for f, w in exp.as_list()]
         fig = exp.as_pyplot_figure()
         plt.tight_layout()
-        
+
         buf = io.BytesIO()
-        fig.savefig(buf, format='png', dpi=300, bbox_inches='tight')
-        plt.close(fig) 
-        buf.seek(0)  
+        fig.savefig(buf, format="png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
+        buf.seek(0)
         if significant_features:
             explanation_text = "Top features affecting the prediction:\n"
             for feature, weight in significant_features[:5]:
                 explanation_text += f"{weight:.2f}: {feature}\n"
         else:
             explanation_text = "The model decision appears evenly distributed across many small features."
-        
+
         photo = BufferedInputFile(buf.getvalue(), filename="lime_explanation_dtc.png")
-        
+
         await message.reply_photo(
             photo,
             caption=f"DT AI-generated probability: {dt_pred:.4f}\n\nElapsed time: {duration_ast:.4f}s\n\n{explanation_text}",
-            parse_mode="Markdown"
+            parse_mode="Markdown",
         )
-        
+
     except Exception as e:
         logging.error(f"Explanation failed: {str(e)}")
         await message.answer(

@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.utils.checkpoint
-from transformers import (
-    RobertaConfig, RobertaModel, DebertaV2Config, DebertaV2Model
-)
+from transformers import DebertaV2Config, DebertaV2Model, RobertaConfig, RobertaModel
 
 
 # Similar to PyTorch's native torch.nn.MarginRankingLoss but with the sigmoid operation on arguments
@@ -42,9 +40,11 @@ class MeanPooling(nn.Module):
 # Rank Model
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
 class ModelType:
-    ROBERTA = 1,
-    DEBERTA = 2,
+    ROBERTA = (1,)
+    DEBERTA = (2,)
+
 
 class AiModel(nn.Module):
     """
