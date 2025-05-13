@@ -62,12 +62,13 @@ We also highly recommend reading report to fully understand context and purpose 
 ├── report
 ├───── pictures
 ├──────── *.jpg, *.png
-├───── main.pdf
+├───── main.pdf                         # Report in PDF format
 ├───── main.tex
+├───── presentation.pdf                 # Presentation in PDF format
 |
-├── src                                  # Source notebooks and scripts
+├── src                                 # Source notebooks and scripts
 ├───── bot
-├──────── main.py                        # Main file for Telegram bot
+├──────── main.py                       # Main file for Telegram bot
 |
 ├───── notebooks
 ├──────── ast_nn.ipynb                              # AST-based MLP solution

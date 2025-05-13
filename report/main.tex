@@ -109,31 +109,31 @@
 \maketitle
 
 \section{Motivation}
-Rapid advancement of artificial intelligence led to the widespread use of large language models in code generation, particularly in programming competitions. Although AI-generated code could help participants, it also raised concerns about fairness and originality in contests where human problem solving skills were evaluated. Detecting AI-generated code had to become an important task in ensuring the integrity of programming competitions.
+Rapid advancement of artificial intelligence led to the widespread use of large language models (LLMs) in code generation, particularly in programming competitions. Although AI-generated code could help participants, it also raised concerns about fairness and originality in contests where human problem solving skills were evaluated. Detecting AI-generated code had to become an important task in ensuring the integrity of programming competitions.
 
-Traditional methods of plagiarism detection were often insufficient for identifying AI-generated code, as LLMs could produce highly varied and syntactically correct solutions that differed from human-written code in subtle but detectable ways. Machine learning (ML) approaches offered a promising solution by analyzing patterns in code structure, style, and other latent features that distinguished machine-generated code from human-written code.
+Traditional methods of plagiarism detection were often insufficient for identifying AI-generated code, as LLMs could produce highly varied and syntactically correct solutions that differed from human-written code. Machine learning (ML) approaches offered a promising solution by analyzing patterns in code structure, style, and other latent features that distinguished machine-generated code from human-written code.
 
-In this project, we explored different ML approaches to detect AI-generated Python code, because this was the most popular programming language. We compared two main strategies:
+In this project, we explored different ML approaches to detect AI-generated Python code, because this is on of the most popular programming language among contest competitors. We compared two main strategies:
 
 
 \begin{itemize}
   \item Pre-trained LLM-based detection --- leveraging a powerful but computationally heavy model to classify code based on deep semantic features
-  \item Tree-based models --- utilizing lightweight decision trees or ensemble methods for faster inference and light weight, which is crucial in time-sensitive evaluation scenarios.
+  \item AST-based models --- utilizing abstract syntax tree embeddings for efficient code representation
 \end{itemize}
 
 Our goal is to evaluate the trade-offs between accuracy and computational efficiency, ensuring that the solution is both reliable and practical for real-world programming competitions conducted on Accept~\cite{Beresnev}. Using these approaches, our aim is to develop a robust detection system that can help maintain fairness in coding contests while optimizing performance for large-scale use.
 
 \section{Related work}
 
-The detection of AI-generated code has gained significant attention with the recent rise of large language models (LLMs) like ChatGPT, Gemini, and GitHub Copilot. Previous studies have explored the detection of machine-generated text using stylometric and statistical techniques, often focusing on natural language (e.g.~\cite{Su2020}). Suh et al.\ proposed GPTSniffer, a fine-tuned CodeBERT model for Java code detection, but its ability to generalize to other languages such as Python remained limited~\cite{Suh24}. Additional work by Choi et al.\ investigated the attribution of authorship of source code through LLMs~\cite{Choi2025}. However, most of these studies have focused on general-purpose detection without specialization for Python or the nuances of specific model requirements. Our work extends this line of research by developing a targeted machine learning pipeline to identify generated Python code, considering the constraints on time consumption.
+The detection of AI-generated code has gained significant attention with the recent rise of LLMs like ChatGPT, Gemini, and GitHub Copilot. Previous studies have explored the detection of machine-generated text using stylometric and statistical techniques, often focusing on natural language (e.g.~\cite{Su2020}). Suh et al.\ proposed GPTSniffer, a fine-tuned CodeBERT model for Java code detection, but its ability to generalize to other languages such as Python remained limited~\cite{Suh24}. Additional work by Choi et al.\ investigated the attribution of authorship of source code through LLMs~\cite{Choi2025}. However, most of these studies have focused on general-purpose detection without specialization for Python or the nuances of specific model requirements. Our work extends this line of research by developing a targeted machine learning pipeline to identify generated Python code, considering the constraints on time consumption.
 
 \section{Data generation}
 
-First of all, the dataset of both human-written and AI-generated codes should be created. The final dataset include 12427 labeled code snippets.
+First of all, the dataset of both human-written and AI-generated codes should be created. The final dataset include 12~427 labeled code snippets.
 
 \subsection{Human-written entities}
 
-As human-written code snippets, anonymized Python solutions of Accept~\cite{Beresnev} platform users are used. Only valid solutions were used: for example, codes that resulted in a compilation error were omitted. In total, 5951 human-written solutions were included into dataset.
+As human-written code snippets, anonymized Python solutions of Accept~\cite{Beresnev} platform users are used. Only valid solutions were used: for example, codes that resulted in a compilation error were omitted. In total, 5~951 human-written solutions were included into dataset.
 
 \subsection{AI-generated entities}
 
@@ -170,11 +170,11 @@ The tasks from Accept~\cite{Beresnev} (solutions of which resulted in human-writ
 }
 \medskip
 
-Therefore, in total there are 6477 AI-generated code snippets.
+Therefore, in total there are 6~477 AI-generated code snippets.
 
 \section{LLM approach}
 
-We decided to check several LLM models to solve our problem - DeBERTaV3 and CodeBERT. To use them, we added a linear layer with 1 output and sigmoid activation function to predict the probability of text to be AI generated. We used Adam optimizer with learning rate 2e-5 and trained them for all models within 2 epochs achieving decent performance.
+We decided to check several LLM models to solve our problem --- DeBERTaV3 and CodeBERT. To use them, we added a linear layer with one output and sigmoid activation function to predict the probability of text to be AI generated. We used Adam optimizer with learning rate 2e-5 and trained them for all models within two epochs achieving decent performance.
 
 \subsection{DeBERTaV3}
 
@@ -187,9 +187,9 @@ CodeBERT~\cite{Feng2020} --- bimodal pre-trained model for programming language 
 \section{AST approach}
 An Abstract Syntax Tree (AST) is a finite labeled oriented tree in which the inner vertices are mapped to programming language operators and the leaves to their corresponding operands.
 
-To distinguish between human-written and AI-generated Python code, we employ an abstract syntax tree (AST)-based representation that captures the structural and syntactic patterns of the code. Unlike raw text-based or token-based methods, ASTs provide a more robust and hierarchical representation of code, making them suitable for detecting subtle differences in coding styles between humans and AI models.
+To distinguish between human-written and AI-generated Python code, we used an abstract syntax tree (AST) based representation that captures the structural and syntactic patterns of the code. Unlike raw text-based or token-based methods, AST provides a more robust and hierarchical representation of code, making it suitable for detecting differences in coding styles between humans and AI models.
 
-The first step in our approach is to convert the Python source code into its AST representation. This is done using \href{https://tree-sitter.github.io/tree-sitter/}{Tree-sitter} library, which parses the code into a tree structure where:
+To convert the Python source code into its AST representation the \href{https://tree-sitter.github.io/tree-sitter/}{Tree-sitter} library was used. It parses the code into a tree structure where:
 
 \begin{itemize}
   \item Nodes represent syntactic elements: functions, loops, conditionals, etc.
@@ -198,12 +198,14 @@ The first step in our approach is to convert the Python source code into its AST
 
 For example, for the code in \Cref{lst:code_ast}, Abstract Syntax Tree is depicted in \Cref{fig:ex_ast}.
 
-\begin{lstlisting}[language=Python,frame=single,caption=Python code snippet,label=lst:code_ast]
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[language=Python,frame=single,caption=Python code snippet,label=lst:code_ast]
 a = 10
 b = 5
 if a < b:
     c = a
 \end{lstlisting}
+\end{minipage}
 
 \begin{figure}[H]
   \centering
@@ -212,13 +214,16 @@ if a < b:
 \end{figure}
 
 \subsection{Decision Tree and Random Forest}
-To complement the computationally expensive LLM-based approach, we explored lightweight yet effective tree-based models --- Decision Trees and Random Forest --- trained on Abstract Syntax Tree (AST) features. These models provide a strong balance between performance and efficiency, making them particularly suitable for deployment in programming competitions where fast inference is critical.
+To opposite the computationally expensive LLM-based approach, we explored lightweight yet effective tree-based models --- Decision Trees and Random Forests --- trained on AST features. These models provide a strong balance between performance and efficiency, making them particularly suitable for deployment in programming competitions where fast inference is critical. As another profit, the Decision Tree modes are quite interpretable (\cref{fig:dt}).
 
-The key advantage of tree-based models lies in their interpretability and speed. Unlike deep learning models, which require significant computational resources, Decision Trees and Random Forests process structured data efficiently, making them ideal for real-time detection systems. By encoding Python code into AST-based features, we enable these models to learn distinguishing patterns between human-written and AI-generated code.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\textwidth]{./pictures/dt.png}
+  \caption{Example of trained Decision Tree with depth 3}\label{fig:dt}
+\end{figure}
 
-However, a notable limitation of tree-based approaches is their reliance on static feature representations. As AI code generation models evolve—with new architectures, fine-tuning techniques, and prompt engineering strategies—the statistical patterns in generated code may change over time. This means that tree-based models, while highly performance in deployment, require periodic retraining on updated datasets to maintain detection accuracy. Without regular updates, their effectiveness may degrade as newer AI models produce code that diverges from previously learned patterns.
+However, a notable limitation of tree-based approaches is their reliance on static feature representations. As AI code generation models evolve with new architectures, fine-tuning techniques, and prompt engineering strategies, the statistical patterns in generated code may change over time. This means that tree-based models, while highly performance in deployment, require periodic retraining on updated datasets to maintain detection accuracy. Without regular updates, their effectiveness may degrade as newer AI models produce code that diverges from previously learned patterns.
 
-Despite this constraint, Decision Trees and Random Forests remain a practical choice for scenarios where low-latency inference is essential. Their ability to deliver high accuracy with minimal computational overhead makes them a compelling alternative to heavy-weight LLM-based detectors, especially in resource-constrained environments such as automated classification systems or programming competitions. For long-term robustness, a hybrid approach --- combining periodic retraining of tree-based models with occasional LLM-based verification --- could offer the best trade-off between speed and adaptability.
 
 \subsection{Multi-Layer Perceptron}
 To complement tree-based methods like Decision Trees and Random Forests, we also explored a Multi-Layer Perceptron (MLP) approach for detecting AI-generated Python code. The MLP model consists of four linear layers with LeakyReLU activation functions and dropout layers for regularization. The input to the network consists of embeddings derived from the Abstract Syntax Tree (AST) representation of the code, and the output is a probability score indicating whether the code was AI-generated. This neural network approach provides a more sophisticated, non-linear alternative capable of capturing complex patterns in the data while maintaining robustness through dropout regularization. The MLP serves as an additional method in our comparative analysis of different techniques for AI-generated code detection.
@@ -227,7 +232,7 @@ To complement tree-based methods like Decision Trees and Random Forests, we also
 
 \subsection{Comparison of models}
 
-The results of the proposed approaches are shown on \Cref{tab:model_comparison}. As you can notice, the CodeBERT-base model demonstrated the best performance in terms of all metrics: F1 score, Roc/Auc, Precision, Recall and Accuracy. However, at the same time it is the second biggest and slowest model. The AST-based Random Forest is the fastest, though its metrics are still descent.
+The results of the proposed approaches are shown on \Cref{tab:model_comparison}. As you can notice, the CodeBERT-base model demonstrated the best performance in terms of all metrics: F1 score, Roc/Auc, Precision, Recall and Accuracy. However, at the same time it is the second biggest and slowest model. The AST-based Random Forest (with 20 estimators) demonstrates decent performance though is quite fast and memory-efficient, though its metrics are still descent.
 \begin{table}[ht!]
   \small
   \centering
@@ -239,8 +244,10 @@ The results of the proposed approaches are shown on \Cref{tab:model_comparison}.
     \textbf{DeBERTa-v3-xsmall} & 0.899          & 0.890          & 0.870          & 0.930          & 0.891          & 0.07           & 269           \\
     \textbf{DeBERTa-v3-base}   & 0.903          & 0.899          & 0.902          & 0.904          & 0.899          & 0.13           & 701           \\
     \textbf{CodeBERT-base}     & \textbf{0.959} & \textbf{0.959} & \textbf{0.978} & \textbf{0.941} & \textbf{0.958} & 0.07           & 475           \\
-    \textbf{Random Forest AST} & 0.841          & 0.835          & 0.834          & 0.847          & 0.835          & \textbf{0.002} & 5.8           \\
-    \textbf{MLP AST}           & 0.787          & 0.785          & 0.809          & 0.767          & 0.784          & 0.004          & \textbf{0.06} \\
+    \midrule
+    \textbf{Decision Tree AST} & 0.796          & 0.787          & 0.794          & 0.798          & 0.788          & \textbf{0.001} & \textbf{0.04} \\
+    \textbf{Random Forest AST} & 0.841          & 0.835          & 0.834          & 0.847          & 0.835          & 0.002          & 5.8           \\
+    \textbf{MLP AST}           & 0.787          & 0.785          & 0.809          & 0.767          & 0.784          & 0.004          & 0.06          \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -251,7 +258,8 @@ In order to interpret decisions of our models, we decided to add Local Interpret
 
 For example, for the code in \Cref{lst:code_lime}, the LIME explanations for AST Random Forest and CodeBERT models are shown in \Cref{fig:LIME_AST,fig:LIME_CodeBERT} respectively.
 
-\begin{lstlisting}[language=Python,frame=single,caption=Python code snippet,label=lst:code_lime]
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[language=Python,frame=single,caption=Python code snippet,label=lst:code_lime]
 n = int(input())
 a = sorted(map(int, input().split()))
 b = sorted(map(int, input().split()))
@@ -260,11 +268,12 @@ for i in range(n-1, -1,-1):
     s += abs(a[i]-b[i])
 print(s)
 \end{lstlisting}
+\end{minipage}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{./pictures/ast_lime.jpg}
-  \caption{Lime explanation for AST RF}\label{fig:LIME_AST}
+  \caption{Lime explanation for AST Random Forest}\label{fig:LIME_AST}
 \end{figure}
 
 \begin{figure}[H]
@@ -277,7 +286,7 @@ The explanation provided by LIME for both models might seem to be unsatisfactory
 
 \section{Deployment}
 
-We decided to deploy our CodeBERT and AST Random Forest models via a Telegram bot with help of \texttt{aiogram} library. We choose such models, since they show best performance for each approach. You can access bot \href{https://t.me/ui_ai_detector_bot}{here}\footnote{If the bot is down, write \href{https://t.me/Kiaver}{Vsevolod Klyushev}}.
+We decided to deploy our CodeBERT and AST Random Forest models via a Telegram bot with help of \texttt{aiogram} library. We choose such models, since they show best performance for each approach. You can access bot \href{https://t.me/ui_ai_detector_bot}{here}\footnote{If the bot is down, write to \href{https://t.me/Kiaver}{Vsevolod Klyushev}}.
 
 \section{GitHub}
 
